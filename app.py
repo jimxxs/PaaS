@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 from models import db, Item
 
@@ -18,7 +18,7 @@ with app.app_context():
 
 @app.get("/")
 def index():
-    return jsonify({"status": "ok", "message": "PaaS demo running on Railway"})
+    return render_template("index.html")
 
 
 @app.get("/items")

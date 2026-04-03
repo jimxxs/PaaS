@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Item Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; color: #222; }
+    h1 { margin-bottom: 24px; }
+    form { display: flex; gap: 8px; margin-bottom: 24px; }
+    input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    button { padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .btn-add  { background: #2563eb; color: #fff; }
+    .btn-del  { background: #ef4444; color: #fff; }
+    .btn-save { background: #16a34a; color: #fff; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+    th { background: #f9fafb; font-weight: 600; }
+    td input { width: 100%; padding: 4px 6px; }
+    .actions { display: flex; gap: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Item Manager</h1>
+
+  <form id="add-form">
+    <input id="name" placeholder="Name" required />
+    <input id="desc" placeholder="Description (optional)" />
+    <button type="submit" class="btn-add">Add</button>
+  </form>
+
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Description</th><th></th></tr></thead>
+    <tbody id="items"></tbody>
+  </table>
+
+  <script>
+    const tbody = document.getElementById("items");
+
+    async function load() {
+      const rows = await fetch("/items").then(r => r.json());
+      tbody.innerHTML = rows.map(item => `
+        <tr id="row-${item.id}">
+          <td>${item.id}</td>
+          <td><input value="${item.name}" id="name-${item.id}" /></td>
+          <td><input value="${item.description ?? ""}" id="desc-${item.id}" /></td>
+          <td class="actions">
+            <button class="btn-save" onclick="save(${item.id})">Save</button>
+            <button class="btn-del"  onclick="del(${item.id})">Delete</button>
+          </td>
+        </tr>`).join("");
+    }
+
+    document.getElementById("add-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      await fetch("/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.value, description: desc.value })
+      });
+      e.target.reset();
+      load();
+    });
+
+    async function save(id) {
+      await fetch(`/items/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: document.getElementById(`name-${id}`).value,
+          description: document.getElementById(`desc-${id}`).value
+        })
+      });
+      load();
+    }
+
+    async function del(id) {
+      await fetch(`/items/${id}`, { method: "DELETE" });
+      load();
+    }
+
+    load();
+  </script>
+</body>
+</html>
