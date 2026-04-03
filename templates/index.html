@@ -54,10 +54,12 @@
 
     document.getElementById("add-form").addEventListener("submit", async e => {
       e.preventDefault();
+      const nameInput = document.getElementById("name");
+      const descInput = document.getElementById("desc");
       await fetch("/items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.value, description: desc.value })
+        body: JSON.stringify({ name: nameInput.value, description: descInput.value })
       });
       e.target.reset();
       load();
