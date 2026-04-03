@@ -34,6 +34,8 @@ def list_items():
 @app.post("/items")
 def create_item():
     data = request.get_json()
+    if not data or "name" not in data:
+        return jsonify({"error": "name is required"}), 400
     item = Item(name=data["name"], description=data.get("description"))
     db.session.add(item)
     db.session.commit()
